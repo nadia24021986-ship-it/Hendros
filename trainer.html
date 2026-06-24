@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Kendali Trainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans">
+
+    <main class="max-w-4xl mx-auto p-4 space-y-6 pt-6">
+        <!-- MONITOR UTAMA & LINK BOX -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <div>
+                <h1 class="text-xl font-black text-indigo-400">👨‍🏫 PANEL UTAMA KENDALI TRAINER</h1>
+                <p class="text-xs text-slate-400">Sistem otomatis real-time sync. Terpisah total dari interface peserta.</p>
+            </div>
+            
+            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-3">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-2 text-[11px]">
+                    <span id="sync-status" class="text-emerald-400 font-bold">Status: Sistem Siap & Online ✅</span>
+                    <button onclick="clearAllDrafts()" class="text-red-400 hover:underline font-bold">⚠️ Reset & Kosongkan Semua Soal</button>
+                </div>
+
+                <!-- KOLOM BAGI LINK PESERTA OTOMATIS -->
+                <div class="space-y-1.5">
+                    <label class="text-[11px] text-slate-400 font-bold block">🔗 LINK LIVE KUESIONER UNTUK PESERTA:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="copy-link-input" readonly class="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-xs text-amber-400 font-mono focus:outline-none">
+                        <button onclick="copyParticipantLink()" id="copy-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-4 rounded-xl transition shrink-0">
+                            📋 Salin Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FORM INPUT SOAL -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-amber-400">📝 Buat Pertanyaan Baru</h2>
+                <span class="text-xs bg-slate-700 px-2.5 py-1 rounded-full text-slate-300">Total Aktif: <span id="q-count" class="font-bold text-indigo-400">0</span> Soal</span>
+            </div>
+
+            <div class="space-y-3 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Tipe</label>
+                        <select id="input-type" onchange="toggleTypeView()" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none">
+                            <option value="ganda">Pilihan Ganda (A, B, C, D)</option>
+                            <option value="isian">Isian Singkat Text</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Kunci Jawaban Benar</label>
+                        <div id="key-ganda-wrapper">
+                            <select id="input-key-ganda" class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 text-xs font-bold focus:outline-none">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                            </select>
+                        </div>
+                        <div id="key-isian-wrapper" class="hidden">
+                            <input type="text" id="input-key-isian" placeholder="Kata kunci..." class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-emerald-400 text-xs font-bold focus:outline-none">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">Pertanyaan Soal</label>
+                    <input type="text" id="input-question" placeholder="Ketik soal disini..." class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none">
+                </div>
+                <div>
+                    <label class="text-[11px] text-slate-400 block mb-1">Link Gambar Pendukung (Opsional)</label>
+                    <input type="text" id="input-image" placeholder="https://..." class="w-full p-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white text-xs focus:outline-none">
+                </div>
+
+                <div id="options-block" class="grid grid-cols-1 md:grid-cols-2 gap-2 pt-1">
+                    <input type="text" id="input-optA" placeholder="Teks Opsi A" class="p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200">
+                    <input type="text" id="input-optB" placeholder="Teks Opsi B" class="p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200">
+                    <input type="text" id="input-optC" placeholder="Teks Opsi C" class="p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200">
+                    <input type="text" id="input-optD" placeholder="Teks Opsi D" class="p-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200">
+                </div>
+
+                <button onclick="saveAndPublishQuestion()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow-lg">
+                    📥 Simpan & Aktifkan Soal Langsung 🚀
+                </button>
+            </div>
+        </div>
+
+        <!-- LIST REKAP SOAL AKTIF -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-3">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">📋 List Soal Aktif di Internet Saat Ini</h3>
+            <div id="trainer-questions-list" class="space-y-2 max-h-60 overflow-y-auto pr-2"></div>
+        </div>
+
+        <!-- REKAP DATA NILAI PESERTA -->
+        <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+            <div class="flex justify-between items-center">
+                <h2 class="text-sm font-bold text-slate-200">📊 Nilai Lembar Kerja Peserta</h2>
+                <button onclick="loadManualRekap()" class="bg-slate-700 hover:bg-slate-600 text-slate-100 text-xs font-bold px-3 py-1.5 rounded-lg border border-slate-600 transition">
+                    🔄 Muat Ulang Hasil Nilai
+                </button>
+            </div>
+            <div class="overflow-x-auto rounded-xl border border-slate-700">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead>
+                        <tr class="bg-slate-700 text-slate-300 uppercase">
+                            <th class="p-3">Nama Lengkap</th>
+                            <th class="p-3">Jabatan & Area</th>
+                            <th class="p-3 text-emerald-400">Total Skor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rekap-table-body" class="divide-y divide-slate-700 bg-slate-800/50">
+                        <tr><td colspan="3" class="p-4 text-center text-slate-500 italic">Tekan tombol di atas untuk menarik rekap data.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const dbBucket = "nadia24021986pwa624x"; 
+        let bankSoal = JSON.parse(localStorage.getItem('trainer_local_bank')) || [];
+
+        window.onload = function() {
+            renderTrainerQuestions(); 
+            document.getElementById('copy-link-input').value = window.location.origin + '/';
+        };
+
+        function copyParticipantLink() {
+            const copyText = document.getElementById('copy-link-input');
+            copyText.select();
+            copyText.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(copyText.value);
+            
+            const btn = document.getElementById('copy-btn');
+            btn.innerText = "✅ Tersalin!";
+            btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
+            setTimeout(() => {
+                btn.innerText = "📋 Salin Link";
+                btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
+            }, 2000);
+        }
+
+        function toggleTypeView() {
+            const type = document.getElementById('input-type').value;
+            document.getElementById('options-block').style.display = type === 'ganda' ? 'grid' : 'none';
+            document.getElementById('key-ganda-wrapper').style.display = type === 'ganda' ? 'block' : 'none';
+            document.getElementById('key-isian-wrapper').style.display = type === 'isian' ? 'block' : 'none';
+        }
+
+        async function saveAndPublishQuestion() {
+            const type = document.getElementById('input-type').value;
+            const question = document.getElementById('input-question').value.trim();
+            const image = document.getElementById('input-image').value.trim();
+            let keyAnswer = '';
+
+            if(!question) { alert('Tulis kalimat pertanyaan terlebih dahulu!'); return; }
+
+            if(type === 'ganda') {
+                keyAnswer = document.getElementById('input-key-ganda').value;
+                const optA = document.getElementById('input-optA').value.trim();
+                const optB = document.getElementById('input-optB').value.trim();
+                const optC = document.getElementById('input-optC').value.trim();
+                const optD = document.getElementById('input-optD').value.trim();
+                if(!optA || !optB || !optC || !optD) { alert('Lengkapi teks opsi jawaban A s/d D!'); return; }
+                var qData = { id: 'q_' + Date.now(), type, question, image, optA, optB, optC, optD, key: keyAnswer };
+            } else {
+                keyAnswer = document.getElementById('input-key-isian').value.trim();
+                if(!keyAnswer) { alert('Wajib isi kata kunci untuk tipe isian!'); return; }
+                var qData = { id: 'q_' + Date.now(), type, question, image, key: keyAnswer };
+            }
+
+            bankSoal.push(qData);
+            localStorage.setItem('trainer_local_bank', JSON.stringify(bankSoal));
+
+            document.getElementById('input-question').value = '';
+            document.getElementById('input-image').value = '';
+            document.getElementById('input-optA').value = '';
+            document.getElementById('input-optB').value = '';
+            document.getElementById('input-optC').value = '';
+            document.getElementById('input-optD').value = '';
+            document.getElementById('input-key-isian').value = '';
+
+            renderTrainerQuestions();
+            await pushUpdatesToCloud();
+        }
+
+        function renderTrainerQuestions() {
+            document.getElementById('q-count').innerText = bankSoal.length;
+            const container = document.getElementById('trainer-questions-list');
+            if(bankSoal.length === 0) {
+                container.innerHTML = '<p class="text-center text-slate-500 text-xs italic py-2">Belum ada soal aktif.</p>'; return;
+            }
+            container.innerHTML = bankSoal.map((q, i) => `
+                <div class="bg-slate-900 p-2.5 rounded-xl border border-slate-700 flex justify-between items-center text-xs">
+                    <div>
+                        <span class="bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">No ${i+1}</span>
+                        <p class="font-bold text-slate-300 mt-1">${q.question}</p>
+                    </div>
+                    <span class="text-emerald-400 font-mono font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20 uppercase text-[11px]">Kunci: ${q.key}</span>
+                </div>
+            `).join('');
+        }
+
+        async function pushUpdatesToCloud() {
+            const statusText = document.getElementById('sync-status');
+            statusText.innerText = "Status: Menyinkronkan perubahan otomatis... ⏳";
+            statusText.className = "text-amber-400 font-bold";
+            try {
+                await fetch(`https://kvdb.io/${dbBucket}/live_soal`, {
+                    method: 'POST',
+                    body: JSON.stringify(bankSoal)
+                });
+                statusText.innerText = "Status: Semua soal otomatis aktif di internet ✅";
+                statusText.className = "text-emerald-400 font-bold";
+            } catch (e) {
+                statusText.innerText = "Status: Gagal terhubung ke internet ❌";
+                statusText.className = "text-red-400 font-bold";
+            }
+        }
+
+        async function loadManualRekap() {
+            const tbody = document.getElementById('rekap-table-body');
+            tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-indigo-400 animate-pulse">Mengunduh data...</td></tr>`;
+            try {
+                const res = await fetch(`https://kvdb.io/${dbBucket}/submissions`);
+                if(!res.ok) { tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-slate-500 italic">Belum ada jawaban.</td></tr>`; return; }
+                const dataSubmit = await res.json() || [];
+                tbody.innerHTML = dataSubmit.map(p => `
+                    <tr class="hover:bg-slate-750 border-t border-slate-700">
+                        <td class="p-3 font-bold text-white">${p.nama}</td>
+                        <td class="p-3 text-slate-400">${p.jabatan} (${p.area})</td>
+                        <td class="p-3 font-mono font-black text-sm text-emerald-400 bg-emerald-500/5 text-center">${p.skor} / 100</td>
+                    </tr>
+                `).join('');
+            } catch(e) { tbody.innerHTML = `<tr><td colspan="3" class="p-4 text-center text-red-400">Gagal memuat data.</td></tr>`; }
+        }
+
+        async function clearAllDrafts() {
+            if(confirm('Hapus total seluruh bank kuesioner?')) {
+                localStorage.removeItem('trainer_local_bank'); 
+                bankSoal = []; 
+                renderTrainerQuestions();
+                await pushUpdatesToCloud();
+            }
+        }
+    </script>
+</body>
+</html>
